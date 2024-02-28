@@ -1,77 +1,79 @@
-"""Functions to help play and score a game of blackjack."""
+"""Functions to help play and score a game of blackjack.
+
+How to play blackjack:    https://bicyclecards.com/how-to-play/blackjack/
+"Standard" playing cards: https://en.wikipedia.org/wiki/Standard_52-card_deck
+"""
 
 
 def value_of_card(card):
-    if card == "J" or card == "Q" or card == "K":
+    if card in ["J", "K", "Q"]:
         return 10
-    elif card == "A":
+    if card == "A":
         return 1
-    else:
-        return int(card)
+    return int(card)
 
 
 def higher_card(card_one, card_two):
-    if card_one == card_two:
-        return card_one, card_two
-    elif card_one in ["10", "J", "Q", "K"] and card_two == 10:
-        return card_one, card_two
-    elif card_two in ["10", "J", "Q", "K"] and card_one == 10:
-        return card_two, card_one
-    elif card_one not in ["A", "10", "J", "Q", "K"] or card_two not in ["A", "10", "J", "Q", "K"]:
-        bigger_value = max(int(card_one), int(card_two))
-        return str(bigger_value)
-    elif card_one in ["J", "Q", "K", "10"] and card_two not in ["J", "Q", "K", "10"]:
+    """Choosing higher card"""
+    card_values = {'J': 10, 'Q': 10, 'K': 10, 'A': 1}
+
+    # Convert numerical cards to integers
+    card_one_value = card_values.get(card_one, None)
+    card_two_value = card_values.get(card_two, None)
+
+    # Handle the case where the card is not a face card, 'A', or a numerical value
+    if card_one_value is None:
+        try:
+            card_one_value = int(card_one)
+        except ValueError as error:
+            raise ValueError(f"Invalid card value: {card_one}") from error
+
+    if card_two_value is None:
+        try:
+            card_two_value = int(card_two)
+        except ValueError as error:
+            raise ValueError(f"Invalid card value: {card_two}") from error
+
+    # Compare card values
+    if card_one_value > card_two_value:
         return card_one
-    else:
+    if card_one_value < card_two_value:
         return card_two
-
-
-print(higher_card("K", "K"))
+    return card_one, card_two
 
 
 def value_of_ace(card_one, card_two):
-    """Calculate the most advantageous value for the ace card.
+    """Calculate the most advantageous value for the ace card."""
+    card_one_value = value_of_card(card_one)
+    card_two_value = value_of_card(card_two)
+    if card_one_value == 1:
+        card_one_value = 11
+    elif card_two_value == 1:
+        card_two_value = 11
 
-    :param card_one, card_two: str - card dealt. See below for values.
-    :return: int - either 1 or 11 value of the upcoming ace card.
-
-    1.  'J', 'Q', or 'K' (otherwise known as "face cards") = 10
-    2.  'A' (ace card) = 11 (if already in hand)
-    3.  '2' - '10' = numerical value.
-    """
-
-    pass
+    if (card_one_value + card_two_value) + 11 > 21:
+        return 1
+    return 11
 
 
 def is_blackjack(card_one, card_two):
-    """Determine if the hand is a 'natural' or 'blackjack'.
-
-    :param card_one, card_two: str - card dealt. See below for values.
-    :return: bool - is the hand is a blackjack (two cards worth 21).
-
-    1.  'J', 'Q', or 'K' (otherwise known as "face cards") = 10
-    2.  'A' (ace card) = 11 (if already in hand)
-    3.  '2' - '10' = numerical value.
-    """
-
-    pass
+    card_one_value = value_of_card(card_one)
+    card_two_value = value_of_card(card_two)
+    if card_one_value == 1:
+        card_one_value = 11
+    elif card_two_value == 1:
+        card_two_value = 11
+    return card_one_value + card_two_value == 21
 
 
 def can_split_pairs(card_one, card_two):
-    """Determine if a player can split their hand into two hands.
-
-    :param card_one, card_two: str - cards dealt.
-    :return: bool - can the hand be split into two pairs? (i.e. cards are of the same value).
-    """
-
-    pass
+    card_one_value = value_of_card(card_one)
+    card_two_value = value_of_card(card_two)
+    return card_one_value + card_two_value == 20 or card_one_value == card_two_value
 
 
 def can_double_down(card_one, card_two):
-    """Determine if a blackjack player can place a double down bet.
+    card_one_value = value_of_card(card_one)
+    card_two_value = value_of_card(card_two)
 
-    :param card_one, card_two: str - first and second cards in hand.
-    :return: bool - can the hand can be doubled down? (i.e. totals 9, 10 or 11 points).
-    """
-
-    pass
+    return (card_one_value + card_two_value) in [9, 10, 11]
